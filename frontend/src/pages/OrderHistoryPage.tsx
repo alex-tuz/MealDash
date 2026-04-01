@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ordersApi, type CreatedOrder } from '../api/orders.api';
+import { useCartStore } from '../store';
 
 const searchOrderSchema = z.object({
   email: z.string().email('Invalid email format').optional().or(z.literal('')),
@@ -41,6 +42,22 @@ export const OrderHistoryPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [reorderMessage, setReorderMessage] = useState<string | null>(null);
+  const reorder = useCartStore((state) => state.reorder);
+
+  const handleReorder = (order: CreatedOrder) => {
+    const result = reorder(
+      order.items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        name: item.name,
+        image: item.image,
+        unitPrice: item.unitPrice,
+      })),
+    );
+    setReorderMessage(result.message);
+    setTimeout(() => setReorderMessage(null), 2500);
+  };
 
   const {
     register,
@@ -192,6 +209,15 @@ export const OrderHistoryPage = () => {
                   <div className="mt-3 md:mt-0 text-right">
                     <p className="text-2xl font-bold text-slate-900">{formatPrice(order.totalPrice)}</p>
                     <p className="text-xs text-slate-600 mt-1">{formatDate(order.createdAt)}</p>
+                                    <div className="mt-3 md:mt-0 md:ml-4">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleReorder(order)}
+                                        className="whitespace-nowrap rounded-lg border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+                                      >
+                                        Reorder
+                                      </button>
+                                    </div>
                   </div>
                 </div>
 
@@ -239,6 +265,16 @@ export const OrderHistoryPage = () => {
           </div>
         )}
       </div>
+
+      {reorderMessage && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-4 right-4 z-50 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 shadow-lg"
+        >
+          {reorderMessage}
+        </div>
+      )}
     </section>
   );
 };

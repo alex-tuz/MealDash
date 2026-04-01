@@ -17,6 +17,7 @@ interface CartStore {
 	decrementItem: (productId: string) => void;
 	setItemQuantity: (productId: string, quantity: number) => void;
 	clearCart: () => void;
+	reorder: (orderItems: Array<{ productId: string; quantity: number; name: string; image: string; unitPrice: number; shopId?: string }>) => { addedCount: number; message: string };
 }
 
 export const useCartStore = create<CartStore>()(
@@ -78,6 +79,43 @@ export const useCartStore = create<CartStore>()(
 					};
 				}),
 			clearCart: () => set({ items: [] }),
+			reorder: (orderItems) => {
+				let addedCount = 0;
+
+
+				set((state) => {
+					const newItems = [...state.items];
+
+					for (const orderItem of orderItems) {
+						const existingIndex = newItems.findIndex((item) => item.id === orderItem.productId);
+
+						if (existingIndex >= 0) {
+							newItems[existingIndex] = {
+								...newItems[existingIndex],
+								quantity: newItems[existingIndex].quantity + orderItem.quantity,
+							};
+						} else {
+							newItems.push({
+								id: orderItem.productId,
+								shopId: orderItem.shopId || '',
+								name: orderItem.name,
+								image: orderItem.image,
+								price: orderItem.unitPrice,
+								category: '',
+								quantity: orderItem.quantity,
+							});
+						}
+						addedCount++;
+					}
+
+					return { items: newItems };
+				});
+
+				return {
+					addedCount,
+					message: `${addedCount} item${addedCount !== 1 ? 's' : ''} added to cart from order`,
+				};
+			},
 		}),
 		{
 			name: CART_STORAGE_KEY,
