@@ -1,7 +1,7 @@
-import { Router } from "express";
+import { Router } from 'express';
 
-import { ShopsController } from "./shops.controller";
-import { ShopsRepository, ShopsService } from "./shops.service";
+import { ShopsController } from './shops.controller';
+import { ShopsRepository, ShopsService } from './shops.service';
 
 export const createShopsModuleRouter = (): Router => {
   const router = Router();
@@ -9,7 +9,7 @@ export const createShopsModuleRouter = (): Router => {
   const service = new ShopsService(repository);
   const controller = new ShopsController(service);
 
-  router.get("/", controller.getShops);
+  router.get('/', controller.getShops);
 
   return router;
 };

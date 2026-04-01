@@ -1,8 +1,8 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response } from 'express';
 
-import { ERROR_CODES, HTTP_STATUS } from "../constants/app.constants";
-import { AppError } from "../errors/app-error";
-import { logger } from "../logger/logger";
+import { ERROR_CODES, HTTP_STATUS } from '../constants/app.constants';
+import { AppError } from '../errors/app-error';
+import { logger } from '../logger/logger';
 
 export const errorHandler = (
   error: unknown,
@@ -13,7 +13,7 @@ export const errorHandler = (
   const timestamp = new Date().toISOString();
 
   if (error instanceof AppError) {
-    logger.warn("Handled application error", {
+    logger.warn('Handled application error', {
       code: error.code,
       message: error.message,
       statusCode: error.statusCode,
@@ -30,12 +30,12 @@ export const errorHandler = (
     return;
   }
 
-  logger.error("Unhandled server error", { error });
+  logger.error('Unhandled server error', { error });
 
   res.status(HTTP_STATUS.internalServerError).json({
     error: {
       code: ERROR_CODES.internalServerError,
-      message: "Internal server error",
+      message: 'Internal server error',
       details: null,
       timestamp,
     },

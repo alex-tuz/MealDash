@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from 'express';
 
-import { ShopsService } from "./shops.service";
+import { ShopsService } from './shops.service';
 
 export class ShopsController {
   constructor(private readonly shopsService: ShopsService) {}

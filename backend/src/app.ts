@@ -1,9 +1,9 @@
-import express from "express";
+import express from 'express';
 
-import { API_ROUTES } from "./common/constants/app.constants";
-import { errorHandler } from "./common/middleware/error-handler";
-import { notFoundHandler } from "./common/middleware/not-found";
-import { createHealthModuleRouter } from "./modules/health/health.module";
+import { API_ROUTES } from './common/constants/app.constants';
+import { errorHandler } from './common/middleware/error-handler';
+import { notFoundHandler } from './common/middleware/not-found';
+import { createHealthModuleRouter } from './modules/health/health.module';
 
 export const app = express();
 

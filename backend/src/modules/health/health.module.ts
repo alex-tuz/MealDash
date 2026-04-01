@@ -1,8 +1,8 @@
-import { Router } from "express";
+import { Router } from 'express';
 
-import { HealthController } from "./health.controller";
-import { HealthRepository } from "./health.repository";
-import { HealthService } from "./health.service";
+import { HealthController } from './health.controller';
+import { HealthRepository } from './health.repository';
+import { HealthService } from './health.service';
 
 export const createHealthModuleRouter = (): Router => {
   const router = Router();
@@ -11,7 +11,7 @@ export const createHealthModuleRouter = (): Router => {
   const service = new HealthService(repository);
   const controller = new HealthController(service);
 
-  router.get("/", controller.getHealth);
+  router.get('/', controller.getHealth);
 
   return router;
 };

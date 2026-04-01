@@ -1,8 +1,8 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response } from 'express';
 
-import { HTTP_STATUS } from "../../common/constants/app.constants";
-import { toResponseEnvelope } from "../../common/interceptors/response.interceptor";
-import { HealthService } from "./health.service";
+import { HTTP_STATUS } from '../../common/constants/app.constants';
+import { toResponseEnvelope } from '../../common/interceptors/response.interceptor';
+import { HealthService } from './health.service';
 
 export class HealthController {
   constructor(private readonly healthService: HealthService) {}

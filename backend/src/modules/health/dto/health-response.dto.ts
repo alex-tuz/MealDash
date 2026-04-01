@@ -1,6 +1,6 @@
 export interface HealthResponseDto {
-  status: "ok";
+  status: 'ok';
   service: string;
-  database: "up";
+  database: 'up';
   timestamp: string;
 }

@@ -1,5 +1,5 @@
-import { AppError } from "../../common/errors/app-error";
-import { ERROR_CODES, HTTP_STATUS } from "../../common/constants/app.constants";
+import { AppError } from '../../common/errors/app-error';
+import { ERROR_CODES, HTTP_STATUS } from '../../common/constants/app.constants';
 
 export class ShopsRepository {}
 
@@ -10,7 +10,7 @@ export class ShopsService {
     void this.shopsRepository;
     throw new AppError(
       HTTP_STATUS.notImplemented,
-      "Shops module is not implemented yet",
+      'Shops module is not implemented yet',
       ERROR_CODES.notImplemented,
     );
   }
