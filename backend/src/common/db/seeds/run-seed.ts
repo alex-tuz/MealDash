@@ -15,6 +15,10 @@ interface ProductSeed {
   category: string;
 }
 
+interface CountRow {
+  count: number;
+}
+
 const SHOPS: ShopSeed[] = [
   {
     name: 'Mc Donny',
@@ -106,7 +110,31 @@ const PRODUCTS: ProductSeed[] = [
   },
 ];
 
+const assertHttpsUrl = (value: string, label: string): void => {
+  try {
+    const parsed = new URL(value);
+
+    if (parsed.protocol !== 'https:') {
+      throw new Error('URL must use https');
+    }
+  } catch (error) {
+    throw new Error(`Invalid image URL for ${label}: ${value}`, { cause: error });
+  }
+};
+
+const validateSeedInput = (): void => {
+  for (const shop of SHOPS) {
+    assertHttpsUrl(shop.image, `shop \"${shop.name}\"`);
+  }
+
+  for (const product of PRODUCTS) {
+    assertHttpsUrl(product.image, `product \"${product.name}\"`);
+  }
+};
+
 const seedDatabase = async (): Promise<void> => {
+  validateSeedInput();
+
   const client = await pool.connect();
 
   try {
@@ -155,10 +183,55 @@ const seedDatabase = async (): Promise<void> => {
       );
     }
 
+    const [{ count: seededShopsCount }] = (
+      await client.query<CountRow>('SELECT COUNT(*)::int AS count FROM shops WHERE name = ANY($1)', [
+        SHOPS.map((shop) => shop.name),
+      ])
+    ).rows;
+
+    const [{ count: seededProductsCount }] = (
+      await client.query<CountRow>(
+        `
+          SELECT COUNT(*)::int AS count
+          FROM products p
+          JOIN shops s ON s.id = p.shop_id
+          WHERE s.name = ANY($1)
+        `,
+        [SHOPS.map((shop) => shop.name)],
+      )
+    ).rows;
+
+    const [{ count: seededCategoriesCount }] = (
+      await client.query<CountRow>(
+        `
+          SELECT COUNT(DISTINCT p.category)::int AS count
+          FROM products p
+          JOIN shops s ON s.id = p.shop_id
+          WHERE s.name = ANY($1)
+        `,
+        [SHOPS.map((shop) => shop.name)],
+      )
+    ).rows;
+
+    if (seededShopsCount < 3) {
+      throw new Error(`Seed validation failed: expected at least 3 shops, got ${seededShopsCount}`);
+    }
+
+    if (seededProductsCount < 10) {
+      throw new Error(`Seed validation failed: expected at least 10 products, got ${seededProductsCount}`);
+    }
+
+    if (seededCategoriesCount < 3) {
+      throw new Error(
+        `Seed validation failed: expected products from at least 3 categories, got ${seededCategoriesCount}`,
+      );
+    }
+
     await client.query('COMMIT');
     logger.info('Database seeding completed', {
-      shopsCount: SHOPS.length,
-      productsCount: PRODUCTS.length,
+      shopsCount: seededShopsCount,
+      productsCount: seededProductsCount,
+      categoriesCount: seededCategoriesCount,
     });
   } catch (error) {
     await client.query('ROLLBACK');

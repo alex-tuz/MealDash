@@ -40,6 +40,22 @@ Health check: `http://localhost:3000/health`
 Shops endpoint: `http://localhost:3000/shops`
 Shop products endpoint: `http://localhost:3000/shops/:id/products`
 
+## Database migrations and seed
+
+1. Apply migrations:
+  `npm run migrate:up`
+2. Seed demo data (3+ shops, 10+ products):
+  `npm run seed`
+
+Seed script behavior:
+
+- Uses upsert strategy by unique keys, so repeated runs do not create duplicates.
+- Validates image URLs before writing to DB (must be valid `https` URLs).
+- Verifies inserted dataset after write:
+  - at least 3 shops
+  - at least 10 products
+  - products from at least 3 categories
+
 ## Expected health response
 
 ```json
