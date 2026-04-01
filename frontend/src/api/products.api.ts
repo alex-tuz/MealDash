@@ -20,11 +20,13 @@ export interface Product {
 export interface ProductsQueryParams {
   categories?: string[];
   sort?: ProductSortOrder;
+  page?: number;
+  limit?: number;
 }
 
 export const productsApi = {
   getByShopId: async (shopId: string, query?: ProductsQueryParams): Promise<Product[]> => {
-    const params: Record<string, string> = {};
+    const params: Record<string, string | number> = {};
 
     if (query?.categories && query.categories.length > 0) {
       params.category = query.categories.join(',');
@@ -32,6 +34,14 @@ export const productsApi = {
 
     if (query?.sort) {
       params.sort = query.sort;
+    }
+
+    if (query?.page !== undefined) {
+      params.page = query.page;
+    }
+
+    if (query?.limit !== undefined) {
+      params.limit = query.limit;
     }
 
     const response = await apiClient.get<{ data: Product[] }>(`/shops/${shopId}/products`, { params });

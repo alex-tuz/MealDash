@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { productsApi, type Product, ProductSortOrder, type ProductSortOrder as ProductSortOrderType } from '../api/products.api';
 import { shopsApi, type Shop } from '../api/shops.api';
 import { ProductGrid } from '../components/ProductGrid';
@@ -34,9 +34,14 @@ export const ShopsPage = () => {
   const [selectedShopId, setSelectedShopId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isProductsLoading, setIsProductsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [productsErrorMessage, setProductsErrorMessage] = useState<string | null>(null);
   const [addedToCartMessage, setAddedToCartMessage] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const bottomSentinelRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
   const addItem = useCartStore((state) => state.addItem);
 
   useEffect(() => {
@@ -79,6 +84,9 @@ export const ShopsPage = () => {
     setSelectedCategories([]);
     setAvailableCategories([]);
     setSelectedSort(undefined);
+    setCurrentPage(1);
+    setHasMore(true);
+    setProducts([]);
   }, [selectedShopId]);
 
   useEffect(() => {
@@ -125,30 +133,48 @@ export const ShopsPage = () => {
     let isMounted = true;
 
     const loadProducts = async () => {
-      setIsProductsLoading(true);
-      setProductsErrorMessage(null);
+      const isInitialLoad = currentPage === 1;
+      if (isInitialLoad) {
+        setIsProductsLoading(true);
+      } else {
+        setIsLoadingMore(true);
+      }
+      if (isInitialLoad) {
+        setProductsErrorMessage(null);
+      }
 
       try {
         const data = await productsApi.getByShopId(selectedShopId, {
           categories: selectedCategories,
           sort: selectedSort,
+          page: currentPage,
+          limit: 30,
         });
 
         if (!isMounted) {
           return;
         }
 
-        setProducts(data);
+        if (isInitialLoad) {
+          setProducts(data);
+        } else {
+          setProducts((prev) => [...prev, ...data]);
+        }
+
+        setHasMore(data.length === 30);
       } catch {
         if (!isMounted) {
           return;
         }
 
-        setProducts([]);
-        setProductsErrorMessage('Failed to load products. Please try again.');
+        if (isInitialLoad) {
+          setProducts([]);
+          setProductsErrorMessage('Failed to load products. Please try again.');
+        }
       } finally {
         if (isMounted) {
           setIsProductsLoading(false);
+          setIsLoadingMore(false);
         }
       }
     };
@@ -158,7 +184,29 @@ export const ShopsPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [selectedShopId, selectedCategories, selectedSort]);
+  }, [selectedShopId, selectedCategories, selectedSort, currentPage]);
+
+  useEffect(() => {
+    if (!bottomSentinelRef.current || !hasMore || isLoadingMore || isProductsLoading) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setCurrentPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(bottomSentinelRef.current);
+    observerRef.current = observer;
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasMore, isLoadingMore, isProductsLoading]);
 
   useEffect(() => {
     if (!addedToCartMessage) {
@@ -194,6 +242,12 @@ export const ShopsPage = () => {
   const clearFilters = () => {
     setSelectedCategories([]);
   };
+
+  useEffect(() => {
+    setCurrentPage(1);
+    setHasMore(true);
+    setProducts([]);
+  }, [selectedCategories, selectedSort]);
 
   const filteredShops = selectedRatingRange
     ? shops.filter((shop) => shop.rating >= selectedRatingRange.min && shop.rating <= selectedRatingRange.max)
@@ -377,12 +431,23 @@ export const ShopsPage = () => {
             )}
 
             {!isProductsLoading && !productsErrorMessage && (
-              <ProductGrid
-                products={products}
-                isLoading={isProductsLoading}
-                errorMessage={productsErrorMessage}
-                onAddToCart={handleAddToCart}
-              />
+              <>
+                <ProductGrid
+                  products={products}
+                  isLoading={isProductsLoading}
+                  errorMessage={productsErrorMessage}
+                  onAddToCart={handleAddToCart}
+                />
+                {isLoadingMore && (
+                  <div className="py-4 text-center">
+                    <p className="text-sm text-slate-600">Loading more products...</p>
+                  </div>
+                )}
+                {hasMore && <div ref={bottomSentinelRef} className="h-4" />}
+                {!hasMore && products.length > 0 && (
+                  <p className="text-center text-sm text-slate-500 py-4">No more products to load</p>
+                )}
+              </>
             )}
           </div>
         </div>
