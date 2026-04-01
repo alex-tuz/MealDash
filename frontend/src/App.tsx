@@ -2,7 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from './components/AppLayout';
 import { CartPage } from './pages/CartPage';
 import { CouponsPage } from './pages/CouponsPage';
-import { ShopsPage } from './pages/ShopsPage';
+import { ShopsPage } from './pages/shops';
 import { OrderHistoryPage } from './pages/OrderHistoryPage';
 
 function App() {
