@@ -1,8 +1,15 @@
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { cartOrderFormSchema, type CartOrderFormValues } from './cart-order-form.schema';
 import {
   selectCartSubtotal,
   selectCartTotalItems,
   useCartStore,
 } from '../store';
+
+const QTY_MIN = 1;
+const QTY_STEP = 1;
 
 export const CartPage = () => {
   const items = useCartStore((state) => state.items);
@@ -10,8 +17,39 @@ export const CartPage = () => {
   const subtotal = useCartStore(selectCartSubtotal);
   const incrementItem = useCartStore((state) => state.incrementItem);
   const decrementItem = useCartStore((state) => state.decrementItem);
+  const setItemQuantity = useCartStore((state) => state.setItemQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
   const clearCart = useCartStore((state) => state.clearCart);
+  const [submitMessage, setSubmitMessage] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid, isSubmitting },
+  } = useForm<CartOrderFormValues>({
+    resolver: zodResolver(cartOrderFormSchema),
+    mode: 'onChange',
+    defaultValues: {
+      name: '',
+      email: '',
+      phone: '',
+      address: '',
+    },
+  });
+
+  const handleOrderSubmit = (values: CartOrderFormValues) => {
+    const orderPayload = {
+      ...values,
+      items: items.map((item) => ({
+        productId: item.id,
+        quantity: item.quantity,
+      })),
+      totalPrice: subtotal,
+    };
+
+    console.info('Prepared order payload', orderPayload);
+    setSubmitMessage('Order data is valid and ready to be sent to API.');
+  };
 
   return (
     <section className="space-y-6">
@@ -53,6 +91,20 @@ export const CartPage = () => {
                     >
                       +
                     </button>
+                    <label className="sr-only" htmlFor={`quantity-${item.id}`}>
+                      Quantity for {item.name}
+                    </label>
+                    <input
+                      id={`quantity-${item.id}`}
+                      type="number"
+                      min={QTY_MIN}
+                      step={QTY_STEP}
+                      value={item.quantity}
+                      onChange={(event) =>
+                        setItemQuantity(item.id, Number.parseInt(event.target.value, 10))
+                      }
+                      className="w-16 rounded-lg border border-slate-300 px-2 py-1 text-center text-sm text-slate-900"
+                    />
                     <button
                       type="button"
                       onClick={() => removeItem(item.id)}
@@ -80,6 +132,79 @@ export const CartPage = () => {
               Clear cart
             </button>
           </div>
+
+          <form
+            className="space-y-4 rounded-2xl border border-slate-200 bg-white p-4"
+            noValidate
+            onSubmit={handleSubmit(handleOrderSubmit)}
+          >
+            <h2 className="text-lg font-semibold text-slate-900">Order details</h2>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <label className="block text-sm font-medium text-slate-700">
+                Name
+                <input
+                  type="text"
+                  autoComplete="name"
+                  {...register('name')}
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none ring-slate-200 transition focus:ring"
+                />
+                {errors.name && <span className="mt-1 block text-xs text-red-600">{errors.name.message}</span>}
+              </label>
+
+              <label className="block text-sm font-medium text-slate-700">
+                Email
+                <input
+                  type="email"
+                  autoComplete="email"
+                  {...register('email')}
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none ring-slate-200 transition focus:ring"
+                />
+                {errors.email && <span className="mt-1 block text-xs text-red-600">{errors.email.message}</span>}
+              </label>
+
+              <label className="block text-sm font-medium text-slate-700">
+                Phone
+                <input
+                  type="tel"
+                  autoComplete="tel"
+                  {...register('phone')}
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none ring-slate-200 transition focus:ring"
+                />
+                {errors.phone && <span className="mt-1 block text-xs text-red-600">{errors.phone.message}</span>}
+              </label>
+
+              <label className="block text-sm font-medium text-slate-700 md:col-span-2">
+                Address
+                <textarea
+                  rows={3}
+                  autoComplete="street-address"
+                  {...register('address')}
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none ring-slate-200 transition focus:ring"
+                />
+                {errors.address && (
+                  <span className="mt-1 block text-xs text-red-600">{errors.address.message}</span>
+                )}
+              </label>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm text-slate-600">Submit is available only when all fields are valid.</p>
+              <button
+                type="submit"
+                disabled={!isValid || isSubmitting || items.length === 0}
+                className="rounded-lg border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-medium text-white transition enabled:hover:bg-slate-700 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-500"
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit order'}
+              </button>
+            </div>
+
+            {submitMessage && (
+              <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                {submitMessage}
+              </p>
+            )}
+          </form>
         </div>
       )}
     </section>
