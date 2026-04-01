@@ -5,9 +5,16 @@ export interface CartItem extends Product {
 	quantity: number;
 }
 
+const MIN_ITEM_QUANTITY = 1;
+
 interface CartStore {
 	items: CartItem[];
 	addItem: (product: Product) => void;
+	removeItem: (productId: string) => void;
+	incrementItem: (productId: string) => void;
+	decrementItem: (productId: string) => void;
+	setItemQuantity: (productId: string, quantity: number) => void;
+	clearCart: () => void;
 }
 
 export const useCartStore = create<CartStore>((set) => ({
@@ -28,5 +35,52 @@ export const useCartStore = create<CartStore>((set) => ({
 				items: [...state.items, { ...product, quantity: 1 }],
 			};
 		}),
+	removeItem: (productId) =>
+		set((state) => ({
+			items: state.items.filter((item) => item.id !== productId),
+		})),
+	incrementItem: (productId) =>
+		set((state) => ({
+			items: state.items.map((item) =>
+				item.id === productId ? { ...item, quantity: item.quantity + 1 } : item,
+			),
+		})),
+	decrementItem: (productId) =>
+		set((state) => ({
+			items: state.items
+				.map((item) =>
+					item.id === productId ? { ...item, quantity: item.quantity - 1 } : item,
+				)
+				.filter((item) => item.quantity >= MIN_ITEM_QUANTITY),
+		})),
+	setItemQuantity: (productId, quantity) =>
+		set((state) => {
+			if (!Number.isFinite(quantity)) {
+				return state;
+			}
+
+			const normalizedQuantity = Math.floor(quantity);
+
+			if (normalizedQuantity < MIN_ITEM_QUANTITY) {
+				return {
+					items: state.items.filter((item) => item.id !== productId),
+				};
+			}
+
+			return {
+				items: state.items.map((item) =>
+					item.id === productId ? { ...item, quantity: normalizedQuantity } : item,
+				),
+			};
+		}),
+	clearCart: () => set({ items: [] }),
 }));
+
+export const selectCartItems = (state: CartStore): CartItem[] => state.items;
+
+export const selectCartTotalItems = (state: CartStore): number =>
+	state.items.reduce((sum, item) => sum + item.quantity, 0);
+
+export const selectCartSubtotal = (state: CartStore): number =>
+	state.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
