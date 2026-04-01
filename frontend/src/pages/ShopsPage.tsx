@@ -51,8 +51,6 @@ export const ShopsPage = () => {
     };
   }, []);
 
-  const selectedShop = shops.find((shop) => shop.id === selectedShopId) ?? null;
-
   useEffect(() => {
     if (!selectedShopId) {
       setProducts([]);
@@ -115,10 +113,8 @@ export const ShopsPage = () => {
   };
 
   return (
-    <section className="space-y-6">
-      <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Shops</h1>
-
-      {isLoading && <p className="text-slate-600">Loading shops...</p>}
+    <section className="space-y-4 md:space-y-6">
+      {isLoading && <p className="text-sm md:text-base text-slate-600">Loading shops...</p>}
 
       {!isLoading && errorMessage && (
         <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -127,14 +123,14 @@ export const ShopsPage = () => {
       )}
 
       {!isLoading && !errorMessage && (
-        <div className="grid gap-4 md:grid-cols-[240px_1fr]">
-          <aside className="rounded-2xl border border-slate-200 bg-white p-4 md:min-h-[calc(100vh-13rem)]">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Shop list</h2>
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-[200px_1fr] lg:grid-cols-[240px_1fr]">
+          <aside className="rounded-2xl border border-slate-200 bg-white p-3 md:p-4 min-h-[calc(100dvh-10rem)]">
+            <h2 className="mb-3 text-xs md:text-sm font-semibold uppercase tracking-wide text-slate-500">Shop list</h2>
 
             {shops.length === 0 ? (
-              <p className="text-sm text-slate-600">No shops found.</p>
+              <p className="text-xs md:text-sm text-slate-600">No shops found.</p>
             ) : (
-              <div className="space-y-2">
+              <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
                 {shops.map((shop) => {
                   const isActive = selectedShopId === shop.id;
 
@@ -143,7 +139,7 @@ export const ShopsPage = () => {
                       key={shop.id}
                       type="button"
                       onClick={() => setSelectedShopId(shop.id)}
-                      className={`w-full rounded-xl border px-3 py-2 text-left text-sm font-medium transition-colors duration-200 ${
+                      className={`w-full rounded-xl border px-3 py-2 text-center md:text-left text-xs md:text-sm font-medium transition-colors duration-200 min-h-[44px] ${
                         isActive
                           ? 'border-slate-900 bg-slate-900 text-white'
                           : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
@@ -175,19 +171,23 @@ export const ShopsPage = () => {
             )}
           </aside>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 md:min-h-[calc(100vh-13rem)]">
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold text-slate-900">
-                {selectedShop ? selectedShop.name : 'Select a shop'}
-              </h2>
-            </div>
+          <div>
+            {isProductsLoading && <p className="text-sm md:text-base text-slate-600">Loading products...</p>}
 
-            <ProductGrid
-              products={products}
-              isLoading={isProductsLoading}
-              errorMessage={productsErrorMessage}
-              onAddToCart={handleAddToCart}
-            />
+            {!isProductsLoading && productsErrorMessage && (
+              <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {productsErrorMessage}
+              </p>
+            )}
+
+            {!isProductsLoading && !productsErrorMessage && (
+              <ProductGrid
+                products={products}
+                isLoading={isProductsLoading}
+                errorMessage={productsErrorMessage}
+                onAddToCart={handleAddToCart}
+              />
+            )}
           </div>
         </div>
       )}

@@ -11,8 +11,8 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
   const fallbackLabel = useMemo(() => product.name.charAt(0).toUpperCase(), [product.name]);
 
   return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-4">
-      <div className="flex h-32 items-center justify-center rounded-xl border border-slate-200 bg-slate-50">
+    <article className="flex flex-col rounded-2xl border border-slate-200 bg-white p-4 h-full">
+      <div className="flex h-40 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 flex-shrink-0">
         {!isImageBroken && product.image ? (
           <img
             src={product.image}
@@ -28,16 +28,16 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
         )}
       </div>
 
-      <div className="mt-3 space-y-2">
-        <h3 className="text-base font-semibold text-slate-900">{product.name}</h3>
+      <div className="mt-4 space-y-3 flex-grow flex flex-col">
+        <h3 className="text-base font-semibold text-slate-900 line-clamp-2">{product.name}</h3>
 
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-sm text-slate-600">${product.price.toFixed(2)}</p>
+        <div className="mt-auto flex items-center justify-between gap-3">
+          <p className="text-sm font-semibold text-slate-900">${product.price.toFixed(2)}</p>
 
           <button
             type="button"
             onClick={() => onAddToCart(product)}
-            className="shrink-0 whitespace-nowrap rounded-lg border border-slate-900 bg-slate-900 px-3 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-slate-700"
+            className="shrink-0 whitespace-nowrap rounded-lg border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-slate-700"
           >
             Add to Cart
           </button>

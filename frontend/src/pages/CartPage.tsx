@@ -88,8 +88,8 @@ export const CartPage = () => {
   };
 
   return (
-    <section className="space-y-6">
-      <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Shopping Cart</h1>
+    <section className="space-y-4 md:space-y-6">
+      <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-slate-900">Shopping Cart</h1>
 
       {items.length === 0 ? (
         <p className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
@@ -101,11 +101,11 @@ export const CartPage = () => {
             {items.map((item) => (
               <article
                 key={item.id}
-                className="rounded-2xl border border-slate-200 bg-white p-4"
+                className="rounded-2xl border border-slate-200 bg-white p-3 md:p-4"
               >
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex min-w-0 items-center gap-4">
-                    <div className="flex h-16 w-28 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                  <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+                    <div className="flex h-16 w-20 sm:w-28 shrink-0 items-center justify-center overflow-hidden rounded-xl md:rounded-2xl border border-slate-200 bg-slate-50">
                       {item.image && !brokenImages[item.id] ? (
                         <img
                           src={item.image}
@@ -123,27 +123,29 @@ export const CartPage = () => {
                       )}
                     </div>
 
-                    <div className="min-w-0">
-                      <h2 className="truncate text-base font-semibold text-slate-900">{item.name}</h2>
-                      <p className="mt-1 text-sm text-slate-600">${item.price.toFixed(2)} each</p>
+                    <div className="min-w-0 flex-1">
+                      <h2 className="truncate text-sm md:text-base font-semibold text-slate-900">{item.name}</h2>
+                      <p className="mt-1 text-xs md:text-sm text-slate-600">${item.price.toFixed(2)} each</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                     <button
                       type="button"
                       onClick={() => decrementItem(item.id)}
-                      className="rounded-lg border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                      className="h-8 w-8 min-h-[44px] min-w-[44px] sm:h-auto sm:w-auto sm:min-h-0 sm:min-w-0 rounded-lg border border-slate-300 px-2 sm:px-3 py-1 text-sm font-medium text-slate-700 hover:bg-slate-100 transition"
+                      aria-label="Decrease quantity"
                     >
-                      -
+                      −
                     </button>
-                    <span className="min-w-8 text-center text-sm font-semibold text-slate-900">
+                    <span className="min-w-8 text-center text-xs md:text-sm font-semibold text-slate-900">
                       {item.quantity}
                     </span>
                     <button
                       type="button"
                       onClick={() => incrementItem(item.id)}
-                      className="rounded-lg border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                      className="h-8 w-8 min-h-[44px] min-w-[44px] sm:h-auto sm:w-auto sm:min-h-0 sm:min-w-0 rounded-lg border border-slate-300 px-2 sm:px-3 py-1 text-sm font-medium text-slate-700 hover:bg-slate-100 transition"
+                      aria-label="Increase quantity"
                     >
                       +
                     </button>
@@ -159,12 +161,12 @@ export const CartPage = () => {
                       onChange={(event) =>
                         setItemQuantity(item.id, Number.parseInt(event.target.value, 10))
                       }
-                      className="w-16 rounded-lg border border-slate-300 px-2 py-1 text-center text-sm text-slate-900"
+                      className="hidden sm:inline-block w-14 sm:w-16 rounded-lg border border-slate-300 px-2 py-1 text-center text-xs md:text-sm text-slate-900"
                     />
                     <button
                       type="button"
                       onClick={() => removeItem(item.id)}
-                      className="ml-1 rounded-lg border border-red-200 px-3 py-1 text-sm font-medium text-red-700 hover:bg-red-50"
+                      className="rounded-lg border border-red-200 px-2 sm:px-3 py-1 text-xs md:text-sm font-medium text-red-700 hover:bg-red-50 transition whitespace-nowrap"
                     >
                       Remove
                     </button>
@@ -174,36 +176,36 @@ export const CartPage = () => {
             ))}
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 rounded-2xl border border-slate-200 bg-white p-3 md:p-4">
             <div>
-              <p className="text-sm text-slate-600">Items: {totalItems}</p>
-              <p className="text-lg font-semibold text-slate-900">Subtotal: ${subtotal.toFixed(2)}</p>
+              <p className="text-xs md:text-sm text-slate-600">Items: {totalItems}</p>
+              <p className="text-base md:text-lg font-semibold text-slate-900">Subtotal: ${subtotal.toFixed(2)}</p>
             </div>
 
             <button
               type="button"
               onClick={clearCart}
-              className="rounded-lg border border-slate-900 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-100"
+              className="w-full sm:w-auto rounded-lg border border-slate-900 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-100 transition"
             >
               Clear cart
             </button>
           </div>
 
           <form
-            className="space-y-4 rounded-2xl border border-slate-200 bg-white p-4"
+            className="space-y-4 rounded-2xl border border-slate-200 bg-white p-3 md:p-4"
             noValidate
             onSubmit={handleSubmit(handleOrderSubmit)}
           >
-            <h2 className="text-lg font-semibold text-slate-900">Order details</h2>
+            <h2 className="text-base md:text-lg font-semibold text-slate-900">Order details</h2>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2">
               <label className="block text-sm font-medium text-slate-700">
                 Name
                 <input
                   type="text"
                   autoComplete="name"
                   {...register('name')}
-                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none ring-slate-200 transition focus:ring"
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none ring-slate-200 transition focus:ring min-h-[44px]"
                 />
                 {errors.name && <span className="mt-1 block text-xs text-red-600">{errors.name.message}</span>}
               </label>
@@ -214,7 +216,7 @@ export const CartPage = () => {
                   type="email"
                   autoComplete="email"
                   {...register('email')}
-                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none ring-slate-200 transition focus:ring"
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none ring-slate-200 transition focus:ring min-h-[44px]"
                 />
                 {errors.email && <span className="mt-1 block text-xs text-red-600">{errors.email.message}</span>}
               </label>
@@ -225,18 +227,18 @@ export const CartPage = () => {
                   type="tel"
                   autoComplete="tel"
                   {...register('phone')}
-                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none ring-slate-200 transition focus:ring"
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none ring-slate-200 transition focus:ring min-h-[44px]"
                 />
                 {errors.phone && <span className="mt-1 block text-xs text-red-600">{errors.phone.message}</span>}
               </label>
 
-              <label className="block text-sm font-medium text-slate-700 md:col-span-2">
+              <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
                 Address
                 <textarea
                   rows={3}
                   autoComplete="street-address"
                   {...register('address')}
-                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none ring-slate-200 transition focus:ring"
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none ring-slate-200 transition focus:ring"
                 />
                 {errors.address && (
                   <span className="mt-1 block text-xs text-red-600">{errors.address.message}</span>
@@ -244,12 +246,12 @@ export const CartPage = () => {
               </label>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="text-sm text-slate-600">Submit is available only when all fields are valid.</p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+              <p className="text-xs md:text-sm text-slate-600">Submit is available only when all fields are valid.</p>
               <button
                 type="submit"
                 disabled={!isValid || isSubmitting || items.length === 0}
-                className="rounded-lg border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-medium text-white transition enabled:hover:bg-slate-700 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-500"
+                className="w-full sm:w-auto rounded-lg border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-medium text-white transition enabled:hover:bg-slate-700 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-500 min-h-[44px]"
               >
                 {isSubmitting ? 'Submitting...' : 'Submit order'}
               </button>

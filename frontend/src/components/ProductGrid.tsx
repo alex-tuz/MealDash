@@ -15,7 +15,7 @@ export const ProductGrid = ({
   onAddToCart,
 }: ProductGridProps) => {
   if (isLoading) {
-    return <p className="text-sm text-slate-600">Loading products...</p>;
+    return <p className="text-xs md:text-sm text-slate-600">Loading products...</p>;
   }
 
   if (errorMessage) {
@@ -27,11 +27,11 @@ export const ProductGrid = ({
   }
 
   if (products.length === 0) {
-    return <p className="text-sm text-slate-600">No products found for this shop.</p>;
+    return <p className="text-xs md:text-sm text-slate-600">No products found for this shop.</p>;
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
       {products.map((product) => (
         <ProductCard key={product.id} product={product} onAddToCart={onAddToCart} />
       ))}
