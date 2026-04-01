@@ -161,6 +161,25 @@ const seedDatabase = async (): Promise<void> => {
     );
     const shopIdsByName = new Map(shopsResult.rows.map((row) => [row.name, row.id]));
 
+    const uniqueCategories = Array.from(new Set(PRODUCTS.map((product) => product.category)));
+
+    for (const categoryName of uniqueCategories) {
+      await client.query(
+        `
+          INSERT INTO categories (name)
+          VALUES ($1)
+          ON CONFLICT (name) DO NOTHING
+        `,
+        [categoryName],
+      );
+    }
+
+    const categoriesResult = await client.query<{ id: string; name: string }>(
+      'SELECT id, name FROM categories WHERE name = ANY($1)',
+      [uniqueCategories],
+    );
+    const categoryIdsByName = new Map(categoriesResult.rows.map((row) => [row.name, row.id]));
+
     for (const product of PRODUCTS) {
       const shopId = shopIdsByName.get(product.shopName);
 
@@ -168,18 +187,24 @@ const seedDatabase = async (): Promise<void> => {
         throw new Error(`Shop not found for product seed: ${product.shopName}`);
       }
 
+      const categoryId = categoryIdsByName.get(product.category);
+
+      if (!categoryId) {
+        throw new Error(`Category not found for product seed: ${product.category}`);
+      }
+
       await client.query(
         `
-          INSERT INTO products (shop_id, name, image, price, category)
+          INSERT INTO products (shop_id, name, image, price, category_id)
           VALUES ($1, $2, $3, $4, $5)
           ON CONFLICT (shop_id, name)
           DO UPDATE SET
             image = EXCLUDED.image,
             price = EXCLUDED.price,
-            category = EXCLUDED.category,
+            category_id = EXCLUDED.category_id,
             updated_at = NOW()
         `,
-        [shopId, product.name, product.image, product.price, product.category],
+        [shopId, product.name, product.image, product.price, categoryId],
       );
     }
 
@@ -204,8 +229,9 @@ const seedDatabase = async (): Promise<void> => {
     const [{ count: seededCategoriesCount }] = (
       await client.query<CountRow>(
         `
-          SELECT COUNT(DISTINCT p.category)::int AS count
+          SELECT COUNT(DISTINCT c.name)::int AS count
           FROM products p
+          JOIN categories c ON c.id = p.category_id
           JOIN shops s ON s.id = p.shop_id
           WHERE s.name = ANY($1)
         `,

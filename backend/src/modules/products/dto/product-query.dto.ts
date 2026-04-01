@@ -5,7 +5,7 @@ export enum ProductSortOrder {
 }
 
 export interface ProductQueryDto {
-  category?: string;
+  categories?: string[];
   sort?: ProductSortOrder;
   page?: number;
   limit?: number;

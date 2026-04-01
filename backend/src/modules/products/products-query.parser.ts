@@ -5,7 +5,7 @@ import { AppError } from '../../common/errors/app-error';
 import { ProductQueryDto, ProductSortOrder } from './dto/product-query.dto';
 
 const productsQuerySchema = z.object({
-  category: z.string().trim().min(1).optional(),
+  category: z.union([z.string(), z.array(z.string())]).optional(),
   sort: z.nativeEnum(ProductSortOrder).optional(),
   page: z.coerce.number().int().min(1).optional(),
   limit: z.coerce.number().int().min(1).max(100).optional(),
@@ -23,5 +23,19 @@ export const parseProductsQuery = (query: unknown): ProductQueryDto => {
     );
   }
 
-  return parsed.data;
+  const rawCategory = parsed.data.category;
+  const categoriesSource = Array.isArray(rawCategory)
+    ? rawCategory
+    : rawCategory
+      ? rawCategory.split(',')
+      : [];
+
+  const categories = Array.from(
+    new Set(categoriesSource.map((value) => value.trim()).filter((value) => value.length > 0)),
+  );
+
+  return {
+    ...parsed.data,
+    categories: categories.length > 0 ? categories : undefined,
+  };
 };

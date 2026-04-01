@@ -4,9 +4,18 @@ import { shopsApi, type Shop } from '../api/shops.api';
 import { ProductGrid } from '../components/ProductGrid';
 import { useCartStore } from '../store';
 
+const formatCategoryLabel = (category: string): string =>
+  category
+    .split(/[_\s-]+/)
+    .filter((part) => part.length > 0)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+
 export const ShopsPage = () => {
   const [shops, setShops] = useState<Shop[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedShopId, setSelectedShopId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isProductsLoading, setIsProductsLoading] = useState(false);
@@ -52,6 +61,45 @@ export const ShopsPage = () => {
   }, []);
 
   useEffect(() => {
+    setSelectedCategories([]);
+    setAvailableCategories([]);
+  }, [selectedShopId]);
+
+  useEffect(() => {
+    if (!selectedShopId) {
+      return;
+    }
+
+    let isMounted = true;
+
+    const loadAvailableCategories = async () => {
+      try {
+        const data = await productsApi.getByShopId(selectedShopId);
+
+        if (!isMounted) {
+          return;
+        }
+
+        const categories = Array.from(new Set(data.map((product) => product.category))).sort((a, b) =>
+          a.localeCompare(b),
+        );
+
+        setAvailableCategories(categories);
+      } catch {
+        if (isMounted) {
+          setAvailableCategories([]);
+        }
+      }
+    };
+
+    loadAvailableCategories();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedShopId]);
+
+  useEffect(() => {
     if (!selectedShopId) {
       setProducts([]);
       setProductsErrorMessage(null);
@@ -65,7 +113,9 @@ export const ShopsPage = () => {
       setProductsErrorMessage(null);
 
       try {
-        const data = await productsApi.getByShopId(selectedShopId);
+        const data = await productsApi.getByShopId(selectedShopId, {
+          categories: selectedCategories,
+        });
 
         if (!isMounted) {
           return;
@@ -91,7 +141,7 @@ export const ShopsPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [selectedShopId]);
+  }, [selectedShopId, selectedCategories]);
 
   useEffect(() => {
     if (!addedToCartMessage) {
@@ -110,6 +160,22 @@ export const ShopsPage = () => {
   const handleAddToCart = (product: Product) => {
     addItem(product);
     setAddedToCartMessage(`${product.name} was added to cart`);
+  };
+
+  const toggleCategory = (category: string) => {
+    setSelectedCategories((previous) => {
+      const isSelected = previous.includes(category);
+
+      if (isSelected) {
+        return previous.filter((item) => item !== category);
+      }
+
+      return [...previous, category];
+    });
+  };
+
+  const clearFilters = () => {
+    setSelectedCategories([]);
   };
 
   return (
@@ -171,7 +237,47 @@ export const ShopsPage = () => {
             )}
           </aside>
 
-          <div>
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-slate-200 bg-white p-3 md:p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs md:text-sm font-semibold uppercase tracking-wide text-slate-500">Categories</p>
+                {selectedCategories.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="rounded-lg border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-100"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                {availableCategories.length === 0 ? (
+                  <p className="text-xs text-slate-500">No categories available for this shop.</p>
+                ) : (
+                  availableCategories.map((category) => {
+                    const isSelected = selectedCategories.includes(category);
+
+                    return (
+                      <button
+                        key={category}
+                        type="button"
+                        onClick={() => toggleCategory(category)}
+                      className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors cursor-pointer ${
+                          isSelected
+                            ? 'border-slate-900 bg-slate-900 text-white'
+                            : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        {formatCategoryLabel(category)}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
             {isProductsLoading && <p className="text-sm md:text-base text-slate-600">Loading products...</p>}
 
             {!isProductsLoading && productsErrorMessage && (
