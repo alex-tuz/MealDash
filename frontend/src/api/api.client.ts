@@ -1,27 +1,10 @@
 import axios from 'axios';
-
-const DEFAULT_API_BASE_URL = 'http://localhost:3000';
+import { API_DEFAULT_BASE_URL, API_TIMEOUT_MS } from './api.constants';
+import { handleApiError } from './api.errors';
 
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? DEFAULT_API_BASE_URL,
-  timeout: 10000,
+  baseURL: import.meta.env.VITE_API_BASE_URL ?? API_DEFAULT_BASE_URL,
+  timeout: API_TIMEOUT_MS,
 });
 
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response) {
-      const status = error.response.status as number;
-
-      if (status >= 500) {
-        console.error('Server error. Please try again later.');
-      } else if (status === 404) {
-        console.error('Requested resource was not found.');
-      }
-    } else {
-      console.error('Network error. Check your connection.');
-    }
-
-    return Promise.reject(error);
-  },
-);
+apiClient.interceptors.response.use((response) => response, handleApiError);

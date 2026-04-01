@@ -7,8 +7,7 @@ export const AppLayout = () => {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <p className="text-lg font-semibold tracking-tight">MealDash</p>
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-start gap-6 px-4 py-4 sm:px-6 lg:px-8">
           <nav className="flex items-center gap-2">
             <NavLink
               to="/"
@@ -36,6 +35,7 @@ export const AppLayout = () => {
               Shopping Cart
             </NavLink>
           </nav>
+          <p className="ml-auto text-lg font-semibold tracking-tight">MealDash</p>
         </div>
       </header>
       <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
