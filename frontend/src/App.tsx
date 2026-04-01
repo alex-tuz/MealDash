@@ -3,7 +3,7 @@ import { AppLayout } from './components/AppLayout';
 import { CartPage } from './pages/cart';
 import { CouponsPage } from './pages/CouponsPage';
 import { ShopsPage } from './pages/shops';
-import { OrderHistoryPage } from './pages/OrderHistoryPage';
+import { OrderHistoryPage } from './pages/order-history';
 
 function App() {
   return (
