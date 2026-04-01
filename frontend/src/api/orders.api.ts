@@ -24,6 +24,7 @@ export interface CreatedOrderItem {
 
 export interface CreatedOrder {
   id: string;
+  orderNumber: number;
   name: string;
   email: string;
   phone: string;

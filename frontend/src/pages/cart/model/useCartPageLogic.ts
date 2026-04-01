@@ -86,7 +86,7 @@ export const useCartPageLogic = () => {
       reset();
       setSubmitNotification({
         tone: 'success',
-        message: `Order ${createdOrderResult.order.id} was created successfully.`,
+        message: `Order #${createdOrderResult.order.orderNumber} was created successfully.`,
       });
       window.setTimeout(() => {
         setSubmitNotification((current) => (current?.tone === 'success' ? null : current));

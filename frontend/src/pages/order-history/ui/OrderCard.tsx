@@ -12,7 +12,7 @@ export const OrderCard = ({ order, onReorder }: OrderCardProps) => {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 pb-4 border-b border-slate-200">
         <div>
           <h3 className="text-lg font-semibold text-slate-900">{order.name}</h3>
-          <p className="text-sm text-slate-600 mt-1">Order #{order.id.slice(0, 8)}</p>
+          <p className="text-sm text-slate-600 mt-1">Order #{order.orderNumber}</p>
         </div>
         <div className="mt-3 md:mt-0 flex items-center gap-4">
           <div className="text-right">

@@ -2,6 +2,7 @@ import { OrderItemSnapshotDto } from './order-item.dto';
 
 export interface OrderResponseDto {
   id: string;
+  orderNumber: number;
   name: string;
   email: string;
   phone: string;

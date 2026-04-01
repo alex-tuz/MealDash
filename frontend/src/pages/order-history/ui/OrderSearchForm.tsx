@@ -57,7 +57,7 @@ export const OrderSearchForm = ({
             <input
               id="orderId"
               type="text"
-              placeholder="uuid"
+              placeholder="e.g. 1024"
               {...register('orderId')}
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:border-slate-900 focus:outline-none"
             />

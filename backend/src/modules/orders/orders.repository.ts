@@ -16,6 +16,7 @@ interface CouponRow {
 
 interface OrderRow {
   id: string;
+  order_number: number;
   name: string;
   email: string;
   phone: string;
@@ -27,6 +28,7 @@ interface OrderRow {
 
 interface CreateOrderResult {
   id: string;
+  orderNumber: number;
   name: string;
   email: string;
   phone: string;
@@ -72,7 +74,7 @@ export class OrdersRepository {
       `
 				INSERT INTO orders (name, email, phone, address, total_price, items)
 				VALUES ($1, $2, $3, $4, $5, $6::jsonb)
-				RETURNING id, name, email, phone, address, total_price, items, created_at
+        RETURNING id, order_number, name, email, phone, address, total_price, items, created_at
 			`,
       [dto.name, dto.email, dto.phone, dto.address, totalPrice, JSON.stringify(snapshotItems)],
     );
@@ -81,6 +83,7 @@ export class OrdersRepository {
 
     return {
       id: row.id,
+      orderNumber: row.order_number,
       name: row.name,
       email: row.email,
       phone: row.phone,
@@ -112,7 +115,7 @@ export class OrdersRepository {
     orderId?: string,
   ): Promise<CreateOrderResult[]> {
     const conditions: string[] = [];
-    const values: string[] = [];
+    const values: Array<string | number> = [];
 
     if (email) {
       conditions.push(`email = $${values.length + 1}`);
@@ -125,8 +128,13 @@ export class OrdersRepository {
     }
 
     if (orderId) {
-      conditions.push(`id = $${values.length + 1}`);
-      values.push(orderId);
+      if (/^\d+$/.test(orderId)) {
+        conditions.push(`order_number = $${values.length + 1}`);
+        values.push(Number(orderId));
+      } else {
+        conditions.push(`id = $${values.length + 1}`);
+        values.push(orderId);
+      }
     }
 
     if (conditions.length === 0) {
@@ -137,7 +145,7 @@ export class OrdersRepository {
 
     const result = await pool.query<OrderRow>(
       `
-        SELECT id, name, email, phone, address, total_price, items, created_at
+        SELECT id, order_number, name, email, phone, address, total_price, items, created_at
         FROM orders
         WHERE ${whereClause}
         ORDER BY created_at DESC
@@ -147,6 +155,7 @@ export class OrdersRepository {
 
     return result.rows.map((row) => ({
       id: row.id,
+      orderNumber: row.order_number,
       name: row.name,
       email: row.email,
       phone: row.phone,

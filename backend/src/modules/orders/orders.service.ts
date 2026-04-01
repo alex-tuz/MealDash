@@ -78,6 +78,7 @@ export class OrdersService {
 
     return {
       id: createdOrder.id,
+      orderNumber: createdOrder.orderNumber,
       name: createdOrder.name,
       email: createdOrder.email,
       phone: createdOrder.phone,
@@ -101,6 +102,7 @@ export class OrdersService {
 
     return orders.map((order) => ({
       id: order.id,
+      orderNumber: order.orderNumber,
       name: order.name,
       email: order.email,
       phone: order.phone,
