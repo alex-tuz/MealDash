@@ -1,9 +1,9 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from './components/AppLayout';
-import { CartPage } from './pages/CartPage';
-import { CouponsPage } from './pages/CouponsPage';
-import { ShopsPage } from './pages/ShopsPage';
-import { OrderHistoryPage } from './pages/OrderHistoryPage';
+import { CartPage } from './pages/cart';
+import { CouponsPage } from './pages/coupons';
+import { ShopsPage } from './pages/shops';
+import { OrderHistoryPage } from './pages/order-history';
 
 function App() {
   return (

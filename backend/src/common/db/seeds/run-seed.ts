@@ -241,7 +241,7 @@ const COUPONS: CouponSeed[] = [
     name: 'Welcome 10% Off',
     code: 'WELCOME10',
     discountPercent: 10,
-    image: 'https://images.unsplash.com/photo-1607082349566-187342175e2f?w=800',
+    image: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=800',
   },
   {
     name: 'Lunch Time Deal',
