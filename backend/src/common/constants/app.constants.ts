@@ -3,6 +3,7 @@ export const SERVICE_NAME = 'food-delivery-backend';
 export const API_ROUTES = {
   health: '/health',
   shops: '/shops',
+  orders: '/orders',
 } as const;
 
 export const HTTP_STATUS = {

@@ -1,4 +1,4 @@
-import { OrderItemDto } from './order-item.dto';
+import { OrderItemSnapshotDto } from './order-item.dto';
 
 export interface OrderResponseDto {
   id: string;
@@ -7,6 +7,6 @@ export interface OrderResponseDto {
   phone: string;
   address: string;
   totalPrice: number;
-  items: OrderItemDto[];
+  items: OrderItemSnapshotDto[];
   createdAt: string;
 }
