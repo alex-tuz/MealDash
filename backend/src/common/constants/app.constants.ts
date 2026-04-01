@@ -4,6 +4,7 @@ export const API_ROUTES = {
   health: '/health',
   shops: '/shops',
   orders: '/orders',
+  coupons: '/coupons',
 } as const;
 
 export const HTTP_STATUS = {

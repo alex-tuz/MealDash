@@ -15,6 +15,13 @@ interface ProductSeed {
   category: string;
 }
 
+interface CouponSeed {
+  name: string;
+  code: string;
+  discountPercent: number;
+  image: string;
+}
+
 interface CountRow {
   count: number;
 }
@@ -229,6 +236,33 @@ const PRODUCTS: ProductSeed[] = [
   },
 ];
 
+const COUPONS: CouponSeed[] = [
+  {
+    name: 'Welcome 10% Off',
+    code: 'WELCOME10',
+    discountPercent: 10,
+    image: 'https://images.unsplash.com/photo-1607082349566-187342175e2f?w=800',
+  },
+  {
+    name: 'Lunch Time Deal',
+    code: 'LUNCH15',
+    discountPercent: 15,
+    image: 'https://images.unsplash.com/photo-1526367790999-0150786686a2?w=800',
+  },
+  {
+    name: 'Weekend Special',
+    code: 'WEEKEND20',
+    discountPercent: 20,
+    image: 'https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?w=800',
+  },
+  {
+    name: 'Healthy Choice',
+    code: 'GREEN12',
+    discountPercent: 12,
+    image: 'https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=800',
+  },
+];
+
 const assertHttpsUrl = (value: string, label: string): void => {
   try {
     const parsed = new URL(value);
@@ -248,6 +282,10 @@ const validateSeedInput = (): void => {
 
   for (const product of PRODUCTS) {
     assertHttpsUrl(product.image, `product \"${product.name}\"`);
+  }
+
+  for (const coupon of COUPONS) {
+    assertHttpsUrl(coupon.image, `coupon \"${coupon.code}\"`);
   }
 };
 
@@ -327,6 +365,22 @@ const seedDatabase = async (): Promise<void> => {
       );
     }
 
+    for (const coupon of COUPONS) {
+      await client.query(
+        `
+          INSERT INTO coupons (name, code, discount_percent, image)
+          VALUES ($1, $2, $3, $4)
+          ON CONFLICT (code)
+          DO UPDATE SET
+            name = EXCLUDED.name,
+            discount_percent = EXCLUDED.discount_percent,
+            image = EXCLUDED.image,
+            updated_at = NOW()
+        `,
+        [coupon.name, coupon.code, coupon.discountPercent, coupon.image],
+      );
+    }
+
     const [{ count: seededShopsCount }] = (
       await client.query<CountRow>('SELECT COUNT(*)::int AS count FROM shops WHERE name = ANY($1)', [
         SHOPS.map((shop) => shop.name),
@@ -358,6 +412,12 @@ const seedDatabase = async (): Promise<void> => {
       )
     ).rows;
 
+    const [{ count: seededCouponsCount }] = (
+      await client.query<CountRow>('SELECT COUNT(*)::int AS count FROM coupons WHERE code = ANY($1)', [
+        COUPONS.map((coupon) => coupon.code),
+      ])
+    ).rows;
+
     if (seededShopsCount < 3) {
       throw new Error(`Seed validation failed: expected at least 3 shops, got ${seededShopsCount}`);
     }
@@ -372,11 +432,16 @@ const seedDatabase = async (): Promise<void> => {
       );
     }
 
+    if (seededCouponsCount < 4) {
+      throw new Error(`Seed validation failed: expected at least 4 coupons, got ${seededCouponsCount}`);
+    }
+
     await client.query('COMMIT');
     logger.info('Database seeding completed', {
       shopsCount: seededShopsCount,
       productsCount: seededProductsCount,
       categoriesCount: seededCategoriesCount,
+      couponsCount: seededCouponsCount,
     });
   } catch (error) {
     await client.query('ROLLBACK');
