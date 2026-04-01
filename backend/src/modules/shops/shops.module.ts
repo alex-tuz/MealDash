@@ -1,7 +1,8 @@
 import { Router } from 'express';
 
 import { ShopsController } from './shops.controller';
-import { ShopsRepository, ShopsService } from './shops.service';
+import { ShopsRepository } from './shops.repository';
+import { ShopsService } from './shops.service';
 
 export const createShopsModuleRouter = (): Router => {
   const router = Router();

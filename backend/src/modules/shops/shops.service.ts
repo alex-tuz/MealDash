@@ -1,17 +1,12 @@
-import { AppError } from '../../common/errors/app-error';
-import { ERROR_CODES, HTTP_STATUS } from '../../common/constants/app.constants';
-
-export class ShopsRepository {}
+import { ShopResponseDto } from './dto/shop-response.dto';
+import { parseShopsFilters } from './shops-query.parser';
+import { ShopsRepository } from './shops.repository';
 
 export class ShopsService {
   constructor(private readonly shopsRepository: ShopsRepository) {}
 
-  public async listShops(): Promise<unknown[]> {
-    void this.shopsRepository;
-    throw new AppError(
-      HTTP_STATUS.notImplemented,
-      'Shops module is not implemented yet',
-      ERROR_CODES.notImplemented,
-    );
+  public async listShops(query: unknown): Promise<ShopResponseDto[]> {
+    const filters = parseShopsFilters(query);
+    return this.shopsRepository.findAll(filters);
   }
 }
