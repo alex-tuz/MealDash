@@ -1,6 +1,7 @@
 import { type RefObject } from 'react';
 import { type Product } from '../../../api/products.api';
 import { ProductGrid } from '../../../components/ProductGrid';
+import { ProductsGridSkeleton } from './ShopsSkeletons';
 
 interface ProductsSectionProps {
   products: Product[];
@@ -22,7 +23,7 @@ export const ProductsSection = ({
   onAddToCart,
 }: ProductsSectionProps) => {
   if (isProductsLoading) {
-    return <p className="text-sm md:text-base text-slate-600">Loading products...</p>;
+    return <ProductsGridSkeleton items={6} />;
   }
 
   if (productsErrorMessage) {
