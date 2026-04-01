@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ordersApi } from '../api/orders.api';
 import { cartOrderFormSchema, type CartOrderFormValues } from './cart-order-form.schema';
 import {
   selectCartSubtotal,
@@ -10,6 +11,16 @@ import {
 
 const QTY_MIN = 1;
 const QTY_STEP = 1;
+const NOTIFICATION_AUTO_HIDE_MS = 3_000;
+const ORDER_CREATE_SUCCESS_STATUS = {
+  ok: 200,
+  created: 201,
+} as const;
+
+type SubmitNotification = {
+  tone: 'success' | 'error';
+  message: string;
+};
 
 export const CartPage = () => {
   const items = useCartStore((state) => state.items);
@@ -20,11 +31,12 @@ export const CartPage = () => {
   const setItemQuantity = useCartStore((state) => state.setItemQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
   const clearCart = useCartStore((state) => state.clearCart);
-  const [submitMessage, setSubmitMessage] = useState<string | null>(null);
+  const [submitNotification, setSubmitNotification] = useState<SubmitNotification | null>(null);
 
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isValid, isSubmitting },
   } = useForm<CartOrderFormValues>({
     resolver: zodResolver(cartOrderFormSchema),
@@ -37,18 +49,41 @@ export const CartPage = () => {
     },
   });
 
-  const handleOrderSubmit = (values: CartOrderFormValues) => {
+  const handleOrderSubmit = async (values: CartOrderFormValues) => {
     const orderPayload = {
       ...values,
       items: items.map((item) => ({
         productId: item.id,
         quantity: item.quantity,
       })),
-      totalPrice: subtotal,
     };
 
-    console.info('Prepared order payload', orderPayload);
-    setSubmitMessage('Order data is valid and ready to be sent to API.');
+    try {
+      const createdOrderResult = await ordersApi.create(orderPayload);
+
+      if (
+        createdOrderResult.status !== ORDER_CREATE_SUCCESS_STATUS.ok &&
+        createdOrderResult.status !== ORDER_CREATE_SUCCESS_STATUS.created
+      ) {
+        throw new Error(`Unexpected order status: ${createdOrderResult.status}`);
+      }
+
+      clearCart();
+      reset();
+      setSubmitNotification({
+        tone: 'success',
+        message: `Order ${createdOrderResult.order.id} was created successfully.`,
+      });
+      window.setTimeout(() => {
+        setSubmitNotification((current) => (current?.tone === 'success' ? null : current));
+      }, NOTIFICATION_AUTO_HIDE_MS);
+    } catch (error) {
+      console.error('Failed to submit order', error);
+      setSubmitNotification({
+        tone: 'error',
+        message: 'Failed to create order. Please try again.',
+      });
+    }
   };
 
   return (
@@ -199,12 +234,21 @@ export const CartPage = () => {
               </button>
             </div>
 
-            {submitMessage && (
-              <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
-                {submitMessage}
-              </p>
-            )}
           </form>
+        </div>
+      )}
+
+      {submitNotification && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`fixed bottom-4 right-4 z-50 rounded-lg px-4 py-3 text-sm font-medium shadow-lg ${
+            submitNotification.tone === 'success'
+              ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
+              : 'border border-red-200 bg-red-50 text-red-700'
+          }`}
+        >
+          {submitNotification.message}
         </div>
       )}
     </section>
