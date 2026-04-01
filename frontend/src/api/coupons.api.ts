@@ -13,4 +13,9 @@ export const couponsApi = {
     const response = await apiClient.get<{ data: Coupon[] }>('/coupons');
     return response.data.data;
   },
+
+  apply: async (code: string): Promise<Coupon> => {
+    const response = await apiClient.post<{ data: Coupon }>('/coupons/apply', { code });
+    return response.data.data;
+  },
 };

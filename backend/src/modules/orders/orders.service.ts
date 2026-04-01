@@ -55,9 +55,24 @@ export class OrdersService {
       };
     });
 
-    const totalPrice = toMoney(
+    const subtotal = toMoney(
       snapshotItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0),
     );
+
+    let totalPrice = subtotal;
+
+    if (dto.couponCode) {
+      const coupon = await this.ordersRepository.findCouponByCode(dto.couponCode);
+
+      if (!coupon) {
+        throw new AppError(HTTP_STATUS.badRequest, 'Invalid coupon code', ERROR_CODES.appError, {
+          couponCode: dto.couponCode,
+        });
+      }
+
+      const discountAmount = toMoney((subtotal * coupon.discountPercent) / 100);
+      totalPrice = toMoney(subtotal - discountAmount);
+    }
 
     const createdOrder = await this.ordersRepository.createOrder(dto, snapshotItems, totalPrice);
 

@@ -11,6 +11,7 @@ export const createCouponsModuleRouter = (): Router => {
   const controller = new CouponsController(service);
 
   router.get('/', controller.getCoupons);
+  router.post('/apply', controller.applyCoupon);
 
   return router;
 };

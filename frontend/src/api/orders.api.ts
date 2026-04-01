@@ -11,6 +11,7 @@ export interface CreateOrderPayload {
   phone: string;
   address: string;
   items: CreateOrderItemPayload[];
+  couponCode?: string;
 }
 
 export interface CreatedOrderItem {

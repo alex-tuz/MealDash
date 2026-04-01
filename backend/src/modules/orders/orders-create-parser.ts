@@ -15,6 +15,13 @@ const createOrderSchema = z.object({
   phone: z.string().trim().min(7).max(40),
   address: z.string().trim().min(5).max(400),
   items: z.array(orderItemSchema).min(1),
+  couponCode: z
+    .string()
+    .trim()
+    .min(3)
+    .max(40)
+    .regex(/^[A-Za-z0-9_-]+$/)
+    .optional(),
 });
 
 export const parseCreateOrderPayload = (payload: unknown): CreateOrderDto => {

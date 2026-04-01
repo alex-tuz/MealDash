@@ -16,4 +16,13 @@ export class CouponsController {
 			next(error);
 		}
 	};
+
+	public applyCoupon = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+		try {
+			const coupon = await this.couponsService.applyCoupon(req.body);
+			res.status(HTTP_STATUS.ok).json(toResponseEnvelope(coupon));
+		} catch (error) {
+			next(error);
+		}
+	};
 }

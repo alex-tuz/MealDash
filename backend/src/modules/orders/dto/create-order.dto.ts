@@ -6,4 +6,5 @@ export interface CreateOrderDto {
   phone: string;
   address: string;
   items: OrderItemDto[];
+  couponCode?: string;
 }

@@ -9,6 +9,11 @@ interface ProductPriceRow {
   price: number;
 }
 
+interface CouponRow {
+  code: string;
+  discount_percent: number;
+}
+
 interface OrderRow {
   id: string;
   name: string;
@@ -84,6 +89,21 @@ export class OrdersRepository {
       items: row.items,
       createdAt: row.created_at,
     };
+  }
+
+  public async findCouponByCode(code: string): Promise<{ code: string; discountPercent: number } | null> {
+    const result = await pool.query<CouponRow>(
+      `
+        SELECT code, discount_percent
+        FROM coupons
+        WHERE UPPER(code) = UPPER($1)
+        LIMIT 1
+      `,
+      [code],
+    );
+
+    const row = result.rows[0];
+    return row ? { code: row.code, discountPercent: row.discount_percent } : null;
   }
 
   public async findBySearchCriteria(
