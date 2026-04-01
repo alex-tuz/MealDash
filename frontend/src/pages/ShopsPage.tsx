@@ -128,7 +128,7 @@ export const ShopsPage = () => {
 
       {!isLoading && !errorMessage && (
         <div className="grid gap-4 md:grid-cols-[240px_1fr]">
-          <aside className="rounded-2xl border border-slate-200 bg-white p-4">
+          <aside className="rounded-2xl border border-slate-200 bg-white p-4 md:min-h-[calc(100vh-13rem)]">
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Shop list</h2>
 
             {shops.length === 0 ? (
@@ -175,7 +175,7 @@ export const ShopsPage = () => {
             )}
           </aside>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 md:min-h-[calc(100vh-13rem)]">
             <div className="mb-4">
               <h2 className="text-lg font-semibold text-slate-900">
                 {selectedShop ? selectedShop.name : 'Select a shop'}

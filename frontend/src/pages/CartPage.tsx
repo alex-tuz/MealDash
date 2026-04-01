@@ -32,6 +32,7 @@ export const CartPage = () => {
   const removeItem = useCartStore((state) => state.removeItem);
   const clearCart = useCartStore((state) => state.clearCart);
   const [submitNotification, setSubmitNotification] = useState<SubmitNotification | null>(null);
+  const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
 
   const {
     register,
@@ -103,9 +104,29 @@ export const CartPage = () => {
                 className="rounded-2xl border border-slate-200 bg-white p-4"
               >
                 <div className="flex items-center justify-between gap-4">
-                  <div className="min-w-0">
-                    <h2 className="truncate text-base font-semibold text-slate-900">{item.name}</h2>
-                    <p className="mt-1 text-sm text-slate-600">${item.price.toFixed(2)} each</p>
+                  <div className="flex min-w-0 items-center gap-4">
+                    <div className="flex h-16 w-28 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                      {item.image && !brokenImages[item.id] ? (
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="h-full w-full object-cover"
+                          loading="lazy"
+                          onError={() =>
+                            setBrokenImages((current) => ({ ...current, [item.id]: true }))
+                          }
+                        />
+                      ) : (
+                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-sm font-semibold text-slate-700">
+                          {item.name.charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="min-w-0">
+                      <h2 className="truncate text-base font-semibold text-slate-900">{item.name}</h2>
+                      <p className="mt-1 text-sm text-slate-600">${item.price.toFixed(2)} each</p>
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-2">
