@@ -1,5 +1,13 @@
 import { apiClient } from './api.client';
 
+export const ProductSortOrder = {
+  PriceAsc: 'price_asc',
+  PriceDesc: 'price_desc',
+  NameAz: 'name_az',
+} as const;
+
+export type ProductSortOrder = (typeof ProductSortOrder)[keyof typeof ProductSortOrder];
+
 export interface Product {
   id: string;
   shopId: string;
@@ -11,7 +19,7 @@ export interface Product {
 
 export interface ProductsQueryParams {
   categories?: string[];
-  sort?: string;
+  sort?: ProductSortOrder;
 }
 
 export const productsApi = {
