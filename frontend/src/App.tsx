@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from './components/AppLayout';
 import { CartPage } from './pages/cart';
-import { CouponsPage } from './pages/CouponsPage';
+import { CouponsPage } from './pages/coupons';
 import { ShopsPage } from './pages/shops';
 import { OrderHistoryPage } from './pages/order-history';
 
