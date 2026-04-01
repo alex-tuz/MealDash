@@ -1,0 +1,65 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: mealdash-db
+    environment:
+      POSTGRES_USER: mealdash
+      POSTGRES_PASSWORD: mealdash
+      POSTGRES_DB: mealdash
+    ports:
+      - '5432:5432'
+    volumes:
+      - mealdash-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U mealdash -d mealdash']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build:
+      context: ./backend
+    container_name: mealdash-backend
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgresql://mealdash:mealdash@db:5432/mealdash
+    command: sh -c "npm run migrate:up && npm run seed && npm run dev"
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./backend:/app
+      - backend-node-modules:/app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          "node -e \"fetch('http://127.0.0.1:3000/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\"",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: mealdash-frontend
+    environment:
+      VITE_API_PROXY_TARGET: http://backend:3000
+    command: sh -c "npm run dev -- --host 0.0.0.0 --port 5173 --strictPort"
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./frontend:/app
+      - frontend-node-modules:/app/node_modules
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  mealdash-postgres-data:
+  backend-node-modules:
+  frontend-node-modules:
