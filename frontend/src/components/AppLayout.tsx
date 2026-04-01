@@ -41,6 +41,18 @@ export const AppLayout = () => {
                 </span>
               )}
             </NavLink>
+            <NavLink
+              to="/orders"
+              className={({ isActive }) =>
+                `${baseNavClassName} text-xs sm:text-sm ${
+                  isActive
+                    ? 'bg-slate-900 text-white'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`
+              }
+            >
+              Orders
+            </NavLink>
           </nav>
           <p className="ml-auto text-lg font-semibold tracking-tight">MealDash</p>
         </div>

@@ -72,4 +72,27 @@ export class OrdersService {
       createdAt: createdOrder.createdAt,
     };
   }
+
+  public async searchOrders(
+    email?: string,
+    phone?: string,
+    orderId?: string,
+  ): Promise<OrderResponseDto[]> {
+    if (!email && !phone && !orderId) {
+      return [];
+    }
+
+    const orders = await this.ordersRepository.findBySearchCriteria(email, phone, orderId);
+
+    return orders.map((order) => ({
+      id: order.id,
+      name: order.name,
+      email: order.email,
+      phone: order.phone,
+      address: order.address,
+      totalPrice: order.totalPrice,
+      items: order.items,
+      createdAt: order.createdAt,
+    }));
+  }
 }

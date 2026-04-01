@@ -85,4 +85,55 @@ export class OrdersRepository {
       createdAt: row.created_at,
     };
   }
+
+  public async findBySearchCriteria(
+    email?: string,
+    phone?: string,
+    orderId?: string,
+  ): Promise<CreateOrderResult[]> {
+    const conditions: string[] = [];
+    const values: string[] = [];
+
+    if (email) {
+      conditions.push(`email = $${values.length + 1}`);
+      values.push(email);
+    }
+
+    if (phone) {
+      conditions.push(`phone = $${values.length + 1}`);
+      values.push(phone);
+    }
+
+    if (orderId) {
+      conditions.push(`id = $${values.length + 1}`);
+      values.push(orderId);
+    }
+
+    if (conditions.length === 0) {
+      return [];
+    }
+
+    const whereClause = conditions.join(' OR ');
+
+    const result = await pool.query<OrderRow>(
+      `
+        SELECT id, name, email, phone, address, total_price, items, created_at
+        FROM orders
+        WHERE ${whereClause}
+        ORDER BY created_at DESC
+      `,
+      values,
+    );
+
+    return result.rows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      email: row.email,
+      phone: row.phone,
+      address: row.address,
+      totalPrice: typeof row.total_price === 'number' ? row.total_price : Number(row.total_price),
+      items: row.items,
+      createdAt: row.created_at,
+    }));
+  }
 }

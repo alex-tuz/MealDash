@@ -45,4 +45,23 @@ export const ordersApi = {
       order: response.data.data,
     };
   },
+
+  search: async (email?: string, phone?: string, orderId?: string): Promise<CreatedOrder[]> => {
+    const params: Record<string, string> = {};
+
+    if (email) {
+      params.email = email;
+    }
+
+    if (phone) {
+      params.phone = phone;
+    }
+
+    if (orderId) {
+      params.id = orderId;
+    }
+
+    const response = await apiClient.get<{ data: CreatedOrder[] }>('/orders', { params });
+    return response.data.data;
+  },
 };
