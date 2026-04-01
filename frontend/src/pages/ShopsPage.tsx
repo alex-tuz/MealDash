@@ -11,12 +11,26 @@ const formatCategoryLabel = (category: string): string =>
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(' ');
 
+interface RatingRange {
+  min: number;
+  max: number;
+  label: string;
+}
+
+const RATING_RANGES: RatingRange[] = [
+  { min: 4.0, max: 5.0, label: '4.0 - 5.0 ⭐' },
+  { min: 3.0, max: 3.99, label: '3.0 - 3.99 ⭐' },
+  { min: 2.0, max: 2.99, label: '2.0 - 2.99 ⭐' },
+  { min: 1.0, max: 1.99, label: '1.0 - 1.99 ⭐' },
+];
+
 export const ShopsPage = () => {
   const [shops, setShops] = useState<Shop[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedSort, setSelectedSort] = useState<ProductSortOrderType | undefined>();
+  const [selectedRatingRange, setSelectedRatingRange] = useState<RatingRange | null>(null);
   const [selectedShopId, setSelectedShopId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isProductsLoading, setIsProductsLoading] = useState(false);
@@ -181,6 +195,30 @@ export const ShopsPage = () => {
     setSelectedCategories([]);
   };
 
+  const filteredShops = selectedRatingRange
+    ? shops.filter((shop) => shop.rating >= selectedRatingRange.min && shop.rating <= selectedRatingRange.max)
+    : shops;
+
+  const handleRatingFilterChange = (range: RatingRange | null) => {
+    setSelectedRatingRange(range);
+
+    if (range) {
+      const matchingShops = shops.filter(
+        (shop) => shop.rating >= range.min && shop.rating <= range.max,
+      );
+
+      if (matchingShops.length > 0 && !matchingShops.find((s) => s.id === selectedShopId)) {
+        setSelectedShopId(matchingShops[0].id);
+      } else if (matchingShops.length === 0) {
+        setSelectedShopId(null);
+      }
+    } else {
+      if (shops.length > 0) {
+        setSelectedShopId(shops[0].id);
+      }
+    }
+  };
+
   return (
     <section className="space-y-4 md:space-y-6">
       {isLoading && <p className="text-sm md:text-base text-slate-600">Loading shops...</p>}
@@ -196,48 +234,76 @@ export const ShopsPage = () => {
           <aside className="rounded-2xl border border-slate-200 bg-white p-3 md:p-4 min-h-[calc(100dvh-10rem)]">
             <h2 className="mb-3 text-xs md:text-sm font-semibold uppercase tracking-wide text-slate-500">Shop list</h2>
 
-            {shops.length === 0 ? (
-              <p className="text-xs md:text-sm text-slate-600">No shops found.</p>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
-                {shops.map((shop) => {
-                  const isActive = selectedShopId === shop.id;
-
+            <div className="mb-3">
+              <select
+                value={selectedRatingRange ? `${selectedRatingRange.min}-${selectedRatingRange.max}` : 'all'}
+                onChange={(e) => {
+                  if (e.target.value === 'all') {
+                    handleRatingFilterChange(null);
+                  } else {
+                    const selected = RATING_RANGES.find((r) => `${r.min}-${r.max}` === e.target.value);
+                    if (selected) handleRatingFilterChange(selected);
+                  }
+                }}
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs md:text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-0"
+              >
+                <option value="all">All Ratings ({shops.length})</option>
+                {RATING_RANGES.map((range) => {
+                  const count = shops.filter((s) => s.rating >= range.min && s.rating <= range.max).length;
                   return (
-                    <button
-                      key={shop.id}
-                      type="button"
-                      onClick={() => setSelectedShopId(shop.id)}
-                      className={`w-full rounded-xl border px-3 py-2 text-center md:text-left text-xs md:text-sm font-medium transition-colors duration-200 min-h-[44px] ${
-                        isActive
-                          ? 'border-slate-900 bg-slate-900 text-white'
-                          : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
-                      }`}
-                    >
-                      <span className="flex items-center gap-2">
-                        {shop.image ? (
-                          <img
-                            src={shop.image}
-                            alt={`${shop.name} logo`}
-                            className="h-6 w-6 rounded-full object-cover"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <span
-                            className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold ${
-                              isActive ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
-                            }`}
-                          >
-                            {shop.name.charAt(0).toUpperCase()}
-                          </span>
-                        )}
-                        <span className="truncate">{shop.name}</span>
-                      </span>
-                    </button>
+                    <option key={`${range.min}-${range.max}`} value={`${range.min}-${range.max}`}>
+                      {range.label} ({count})
+                    </option>
                   );
                 })}
-              </div>
-            )}
+              </select>
+            </div>
+
+            <div className="border-t border-slate-200 pt-3">
+              {filteredShops.length === 0 ? (
+                <p className="text-xs md:text-sm text-slate-600">No shops found.</p>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
+                  {filteredShops.map((shop) => {
+                    const isActive = selectedShopId === shop.id;
+
+                    return (
+                      <button
+                        key={shop.id}
+                        type="button"
+                        onClick={() => setSelectedShopId(shop.id)}
+                        className={`w-full rounded-xl border px-3 py-2 text-center md:text-left text-xs md:text-sm font-medium transition-colors duration-200 min-h-[44px] ${
+                          isActive
+                            ? 'border-slate-900 bg-slate-900 text-white'
+                            : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          {shop.image ? (
+                            <img
+                              src={shop.image}
+                              alt={`${shop.name} logo`}
+                              className="h-6 w-6 rounded-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <span
+                              className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold ${
+                                isActive ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                              }`}
+                            >
+                              {shop.name.charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                          <span className="truncate text-left">{shop.name}</span>
+                          <span className="ml-auto text-[11px] font-semibold">{shop.rating}</span>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </aside>
 
           <div className="space-y-4">
