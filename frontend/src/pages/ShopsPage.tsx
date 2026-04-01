@@ -1,11 +1,19 @@
 import { useEffect, useState } from 'react';
+import { productsApi, type Product } from '../api/products.api';
 import { shopsApi, type Shop } from '../api/shops.api';
+import { ProductGrid } from '../components/ProductGrid';
+import { useCartStore } from '../store';
 
 export const ShopsPage = () => {
   const [shops, setShops] = useState<Shop[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [selectedShopId, setSelectedShopId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isProductsLoading, setIsProductsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [productsErrorMessage, setProductsErrorMessage] = useState<string | null>(null);
+  const [addedToCartMessage, setAddedToCartMessage] = useState<string | null>(null);
+  const addItem = useCartStore((state) => state.addItem);
 
   useEffect(() => {
     let isMounted = true;
@@ -44,6 +52,67 @@ export const ShopsPage = () => {
   }, []);
 
   const selectedShop = shops.find((shop) => shop.id === selectedShopId) ?? null;
+
+  useEffect(() => {
+    if (!selectedShopId) {
+      setProducts([]);
+      setProductsErrorMessage(null);
+      return;
+    }
+
+    let isMounted = true;
+
+    const loadProducts = async () => {
+      setIsProductsLoading(true);
+      setProductsErrorMessage(null);
+
+      try {
+        const data = await productsApi.getByShopId(selectedShopId);
+
+        if (!isMounted) {
+          return;
+        }
+
+        setProducts(data);
+      } catch {
+        if (!isMounted) {
+          return;
+        }
+
+        setProducts([]);
+        setProductsErrorMessage('Failed to load products. Please try again.');
+      } finally {
+        if (isMounted) {
+          setIsProductsLoading(false);
+        }
+      }
+    };
+
+    loadProducts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedShopId]);
+
+  useEffect(() => {
+    if (!addedToCartMessage) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setAddedToCartMessage(null);
+    }, 1600);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [addedToCartMessage]);
+
+  const handleAddToCart = (product: Product) => {
+    addItem(product);
+    setAddedToCartMessage(`${product.name} was added to cart`);
+  };
 
   return (
     <section className="space-y-6">
@@ -107,12 +176,23 @@ export const ShopsPage = () => {
           </aside>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <h2 className="text-lg font-semibold text-slate-900">
-              {selectedShop ? selectedShop.name : 'Select a shop'}
-            </h2>
-            <p className="mt-2 text-sm text-slate-600">
-              Product grid for this shop will be added in Task 08.
-            </p>
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <h2 className="text-lg font-semibold text-slate-900">
+                {selectedShop ? selectedShop.name : 'Select a shop'}
+              </h2>
+              {addedToCartMessage && (
+                <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700">
+                  {addedToCartMessage}
+                </div>
+              )}
+            </div>
+
+            <ProductGrid
+              products={products}
+              isLoading={isProductsLoading}
+              errorMessage={productsErrorMessage}
+              onAddToCart={handleAddToCart}
+            />
           </div>
         </div>
       )}
