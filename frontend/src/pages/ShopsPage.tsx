@@ -24,6 +24,8 @@ const RATING_RANGES: RatingRange[] = [
   { min: 1.0, max: 1.99, label: '1.0 - 1.99 ⭐' },
 ];
 
+const PRODUCTS_PER_PAGE = 10;
+
 export const ShopsPage = () => {
   const [shops, setShops] = useState<Shop[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -148,7 +150,7 @@ export const ShopsPage = () => {
           categories: selectedCategories,
           sort: selectedSort,
           page: currentPage,
-          limit: 30,
+          limit: PRODUCTS_PER_PAGE,
         });
 
         if (!isMounted) {
@@ -161,7 +163,7 @@ export const ShopsPage = () => {
           setProducts((prev) => [...prev, ...data]);
         }
 
-        setHasMore(data.length === 30);
+        setHasMore(data.length === PRODUCTS_PER_PAGE);
       } catch {
         if (!isMounted) {
           return;
