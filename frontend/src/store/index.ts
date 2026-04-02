@@ -6,17 +6,27 @@ export interface CartItem extends Product {
 	quantity: number;
 }
 
+export interface CheckoutDraft {
+	name: string;
+	email: string;
+	phone: string;
+	address: string;
+}
+
 const MIN_ITEM_QUANTITY = 1;
 const CART_STORAGE_KEY = 'meal-dash-cart';
 
 interface CartStore {
 	items: CartItem[];
+	checkoutDraft: CheckoutDraft | null;
 	addItem: (product: Product) => void;
 	removeItem: (productId: string) => void;
 	incrementItem: (productId: string) => void;
 	decrementItem: (productId: string) => void;
 	setItemQuantity: (productId: string, quantity: number) => void;
 	clearCart: () => void;
+	setCheckoutDraft: (draft: CheckoutDraft) => void;
+	clearCheckoutDraft: () => void;
 	reorder: (orderItems: Array<{ productId: string; quantity: number; name: string; image: string; unitPrice: number; shopId?: string }>) => { addedCount: number; message: string };
 }
 
@@ -24,6 +34,7 @@ export const useCartStore = create<CartStore>()(
 	persist(
 		(set) => ({
 			items: [],
+			checkoutDraft: null,
 			addItem: (product) =>
 				set((state) => {
 					const existing = state.items.find((item) => item.id === product.id);
@@ -79,6 +90,8 @@ export const useCartStore = create<CartStore>()(
 					};
 				}),
 			clearCart: () => set({ items: [] }),
+			setCheckoutDraft: (draft) => set({ checkoutDraft: draft }),
+			clearCheckoutDraft: () => set({ checkoutDraft: null }),
 			reorder: (orderItems) => {
 				let addedCount = 0;
 
@@ -119,6 +132,9 @@ export const useCartStore = create<CartStore>()(
 		}),
 		{
 			name: CART_STORAGE_KEY,
+			partialize: (state) => ({
+				items: state.items,
+			}),
 		},
 	),
 );

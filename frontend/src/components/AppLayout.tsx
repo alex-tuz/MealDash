@@ -51,7 +51,7 @@ export const AppLayout = () => {
                 }`
               }
             >
-              Orders
+              History
             </NavLink>
             <NavLink
               to="/coupons"
