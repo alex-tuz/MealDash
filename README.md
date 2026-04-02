@@ -50,6 +50,11 @@ This starts:
 Open the app at:
 - http://localhost:5173
 
+## Deployment
+
+- Concrete stack: Vercel frontend + Render backend + Render PostgreSQL
+- Public deployment URL is added after frontend and backend are published
+
 ## Local Startup Without Docker
 
 ### Backend
