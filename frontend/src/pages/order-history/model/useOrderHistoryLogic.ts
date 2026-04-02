@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useNavigate } from 'react-router-dom';
 import { ordersApi, type CreatedOrder } from '../../../api/orders.api';
 import { useCartStore } from '../../../store';
 import { searchOrderSchema, type SearchOrderForm } from './search-order.schema';
@@ -8,12 +9,14 @@ import { searchOrderSchema, type SearchOrderForm } from './search-order.schema';
 const REORDER_MESSAGE_TIMEOUT_MS = 2_500;
 
 export const useOrderHistoryLogic = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<CreatedOrder[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [reorderMessage, setReorderMessage] = useState<string | null>(null);
   const reorder = useCartStore((state) => state.reorder);
+  const setCheckoutDraft = useCartStore((state) => state.setCheckoutDraft);
 
   const {
     register,
@@ -25,6 +28,13 @@ export const useOrderHistoryLogic = () => {
   });
 
   const handleReorder = (order: CreatedOrder) => {
+    setCheckoutDraft({
+      name: order.name,
+      email: order.email,
+      phone: order.phone,
+      address: order.address,
+    });
+
     const result = reorder(
       order.items.map((item) => ({
         productId: item.productId,
@@ -36,6 +46,7 @@ export const useOrderHistoryLogic = () => {
     );
     setReorderMessage(result.message);
     window.setTimeout(() => setReorderMessage(null), REORDER_MESSAGE_TIMEOUT_MS);
+    navigate('/cart');
   };
 
   const onSubmit = async (data: SearchOrderForm) => {

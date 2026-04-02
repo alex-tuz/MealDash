@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ordersApi } from '../../../api/orders.api';
@@ -25,6 +25,8 @@ export const useCartPageLogic = () => {
   const setItemQuantity = useCartStore((state) => state.setItemQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
   const clearCart = useCartStore((state) => state.clearCart);
+  const checkoutDraft = useCartStore((state) => state.checkoutDraft);
+  const clearCheckoutDraft = useCartStore((state) => state.clearCheckoutDraft);
 
   const [submitNotification, setSubmitNotification] = useState<SubmitNotification | null>(null);
   const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
@@ -54,6 +56,20 @@ export const useCartPageLogic = () => {
       address: '',
     },
   });
+
+  useEffect(() => {
+    if (!checkoutDraft) {
+      return;
+    }
+
+    reset({
+      name: checkoutDraft.name,
+      email: checkoutDraft.email,
+      phone: checkoutDraft.phone,
+      address: checkoutDraft.address,
+    });
+    clearCheckoutDraft();
+  }, [checkoutDraft, clearCheckoutDraft, reset]);
 
   const clearCartAndCouponState = () => {
     clearCart();

@@ -10,7 +10,7 @@ export const ShopsSidebar = ({
   onRatingFilterChange,
 }: ShopsSidebarProps) => {
   return (
-    <aside className="rounded-2xl border border-slate-200 bg-white p-3 md:p-4 min-h-[calc(100dvh-10rem)]">
+    <aside className="self-start rounded-2xl border border-slate-200 bg-white p-3 md:p-4 md:sticky md:top-16 md:h-[calc(100dvh-8rem)] md:overflow-y-auto">
       <h2 className="mb-3 text-xs md:text-sm font-semibold uppercase tracking-wide text-slate-500">Shop list</h2>
 
       <div className="mb-3">

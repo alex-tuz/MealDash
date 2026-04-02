@@ -19,7 +19,7 @@ export const OrderSearchForm = ({
   onReset,
 }: OrderSearchFormProps) => {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 md:p-6 mb-8">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 md:p-6">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>

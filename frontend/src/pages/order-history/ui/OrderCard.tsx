@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { type CreatedOrder } from '../../../api/orders.api';
 import { formatDate, formatPrice } from '../model/order-history.utils';
 
@@ -7,6 +8,8 @@ interface OrderCardProps {
 }
 
 export const OrderCard = ({ order, onReorder }: OrderCardProps) => {
+  const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
+
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4 md:p-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 pb-4 border-b border-slate-200">
@@ -49,15 +52,31 @@ export const OrderCard = ({ order, onReorder }: OrderCardProps) => {
       <div className="border-t border-slate-200 pt-4">
         <h4 className="font-semibold text-slate-900 mb-3">Items</h4>
         <div className="space-y-2">
-          {order.items.map((item, index) => (
-            <div key={`${item.productId}-${index}`} className="flex items-start gap-3">
-              {item.image && (
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="h-12 w-12 rounded-lg object-cover"
-                />
-              )}
+          {order.items.map((item, index) => {
+            const imageKey = `${item.productId}-${index}`;
+
+            return (
+              <div key={imageKey} className="flex items-start gap-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                {item.image && !brokenImages[imageKey] ? (
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                    onError={() =>
+                      setBrokenImages((current) => ({
+                        ...current,
+                        [imageKey]: true,
+                      }))
+                    }
+                  />
+                ) : (
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-700">
+                    {item.name.charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
               <div className="flex-1 text-sm">
                 <p className="font-medium text-slate-900">{item.name}</p>
                 <p className="text-slate-600">
@@ -65,7 +84,8 @@ export const OrderCard = ({ order, onReorder }: OrderCardProps) => {
                 </p>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
